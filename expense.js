@@ -1,5 +1,5 @@
 import fs from "fs";
-import path from "path"
+import path from "path";
 
 const filePath = path.resolve("./expenses.json");
 
@@ -19,7 +19,11 @@ function loadExpenses() {
 }
 
 function saveExpenses(expenses) {
-    fs.writeFileSync(filePath, JSON.stringify(expenses, null, 2));
+    try {
+        fs.writeFileSync(filePath, JSON.stringify(expenses, null, 2));
+    } catch (err) {
+        console.error("Failed to save expenses:", err.message);
+    }
 }
 
 function getNextId(expenses) {
@@ -38,6 +42,9 @@ export function addExpense(description, amount) {
         createdAt: today.toISOString(),
         updatedAt: today.toISOString()
     };
+    expenses.push(entry);
+    saveExpenses(expenses);
+    console.log(`Added: [${id}] ${description} - $${amount}`);
 }
 
 export function updateExpense(id, description, amount) {
@@ -61,8 +68,8 @@ export function updateExpense(id, description, amount) {
 }
 
 export function deleteExpense(id) {
-    let expense = loadExpenses();
-    const len = expense.length;
+    let expenses = loadExpenses();
+    const len = expenses.length;
     expenses = expenses.filter(e => e.id !== id);
 
     if (expenses === len) {
@@ -74,7 +81,7 @@ export function deleteExpense(id) {
     console.log(`Deleted expense ${id}`);
 }
 
-export function listExpense() {
+export function listExpenses() {
     const expenses = loadExpenses();
 
     if (expenses.length === 0) {
